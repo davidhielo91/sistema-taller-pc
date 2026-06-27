@@ -6,10 +6,10 @@ import {
   TRANSICIONES,
   formatDate,
   formatDateShort,
+  formatCurrency,
+  getMoneda,
   ordenEstaAtrasada,
   esEstadoTerminal,
-  getMoneda,
-  formatCurrency,
 } from "@/lib/utils";
 import { CambiarEstadoForm } from "./CambiarEstadoForm";
 import { DiagnosticoForm } from "./DiagnosticoForm";
@@ -126,12 +126,12 @@ export default async function OrdenDetailPage(props: {
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha de ingreso</span>
-                <span>{await formatDate(orden.fechaIngreso)}</span>
+                <span>{formatDate(orden.fechaIngreso, moneda)}</span>
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha prometida</span>
                 <span className={atrasada ? "text-danger" : ""}>
-                  {await formatDateShort(orden.fechaPrometida)}
+                  {formatDateShort(orden.fechaPrometida, moneda)}
                 </span>
               </div>
             </div>
@@ -144,9 +144,7 @@ export default async function OrdenDetailPage(props: {
               <div className="detail-field">
                 <span className="detail-label">Costo</span>
                 <span className="text-lg">
-                  {await formatCurrency(
-                    orden.costo ? Number(orden.costo) : null
-                  )}
+                  {formatCurrency(orden.costo ? Number(orden.costo) : null, moneda)}
                 </span>
               </div>
               <div className="detail-field">
@@ -163,7 +161,7 @@ export default async function OrdenDetailPage(props: {
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha de entrega</span>
-                <span>{await formatDate(orden.fechaEntrega)}</span>
+                <span>{formatDate(orden.fechaEntrega, moneda)}</span>
               </div>
             </div>
           </div>
@@ -176,12 +174,11 @@ export default async function OrdenDetailPage(props: {
             <p className="text-muted">Sin diagnósticos registrados.</p>
           ) : (
             <div className="diagnosticos-list">
-              {await Promise.all(
-                orden.diagnosticos.map(async (d) => (
+              {orden.diagnosticos.map((d) => (
                   <div key={d.id} className="diagnostico-item">
                     <div className="diagnostico-header">
                       <span className="text-muted">
-                        {await formatDate(d.createdAt)} - {d.tecnico.nombre}
+                        {formatDate(d.createdAt, moneda)} - {d.tecnico.nombre}
                       </span>
                       <span>
                         {d.aprobado === true && (
@@ -213,15 +210,14 @@ export default async function OrdenDetailPage(props: {
                     {d.costoEstimado != null && (
                       <p>
                         <strong>Costo estimado:</strong>{" "}
-                        {await formatCurrency(Number(d.costoEstimado))}
+                        {formatCurrency(Number(d.costoEstimado), moneda)}
                       </p>
                     )}
                     {d.aprobado === null && (
                       <AprobarDiagnostico diagnosticoId={d.id} />
                     )}
                   </div>
-                ))
-              )}
+                ))}
             </div>
           )}
           {!terminal && (
@@ -247,6 +243,42 @@ export default async function OrdenDetailPage(props: {
               moneda={moneda}
             />
           )}
+
+        {/* Bitácora de estados */}
+        <div className="detail-card">
+          <h2>Bitácora de cambios</h2>
+          {orden.historial.length === 0 ? (
+            <p className="text-muted">Sin cambios de estado registrados.</p>
+          ) : (
+            <ol className="timeline">
+              {orden.historial.map((h) => (
+                <li key={h.id} className="timeline-item">
+                  <span className="timeline-fecha">
+                    {formatDate(h.createdAt, moneda)}
+                  </span>
+                  <span className="timeline-evento">
+                    {h.estadoAnterior && (
+                      <>
+                        <span
+                          className={`estado-badge estado-${h.estadoAnterior.toLowerCase()}`}
+                        >
+                          {ESTADO_LABELS[h.estadoAnterior]}
+                        </span>
+                        <span className="timeline-arrow"> → </span>
+                      </>
+                    )}
+                    <span
+                      className={`estado-badge estado-${h.estadoNuevo.toLowerCase()}`}
+                    >
+                      {ESTADO_LABELS[h.estadoNuevo]}
+                    </span>
+                  </span>
+                  <span className="timeline-usuario">{h.usuario.nombre}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
       </div>
     </>
   );

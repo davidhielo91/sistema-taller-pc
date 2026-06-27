@@ -73,8 +73,8 @@ export default async function ComprobantePage(props: {
         <div className="row"><span className="label">Falla reportada</span><span className="value">{orden.fallaReportada}</span></div>
         {orden.accesorios && <div className="row"><span className="label">Accesorios</span><span className="value">{orden.accesorios}</span></div>}
         {orden.estadoFisico && <div className="row"><span className="label">Estado físico</span><span className="value">{orden.estadoFisico}</span></div>}
-        <div className="row"><span className="label">Fecha de ingreso</span><span className="value">{await formatDateShort(orden.fechaIngreso)}</span></div>
-        <div className="row"><span className="label">Fecha prometida</span><span className="value">{await formatDateShort(orden.fechaPrometida)}</span></div>
+        <div className="row"><span className="label">Fecha de ingreso</span><span className="value">{formatDateShort(orden.fechaIngreso, ajustes?.moneda ?? "MXN")}</span></div>
+        <div className="row"><span className="label">Fecha prometida</span><span className="value">{formatDateShort(orden.fechaPrometida, ajustes?.moneda ?? "MXN")}</span></div>
       </div>
 
       <div className="footer">

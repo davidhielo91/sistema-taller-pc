@@ -31,16 +31,23 @@ export function Sidebar({
         <h2>Taller PC</h2>
       </div>
       <ul className="sidebar-menu">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link
-              href={link.href}
-              className={pathname.startsWith(link.href) ? "active" : ""}
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
+        {links.map((link) => {
+          const isActive =
+            link.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(link.href);
+          return (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className={isActive ? "active" : ""}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
       <div className="sidebar-footer">
         <div className="user-info">

@@ -55,28 +55,26 @@ export async function getMoneda(): Promise<string> {
   return ajustes?.moneda ?? "MXN";
 }
 
-export async function formatDate(date: Date | null | undefined): Promise<string> {
+export function formatDate(date: Date | null | undefined, moneda: string): string {
   if (!date) return "-";
-  const moneda = await getMoneda();
   return new Intl.DateTimeFormat(localeDesdeMoneda(moneda), {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-export async function formatDateShort(date: Date | null | undefined): Promise<string> {
+export function formatDateShort(date: Date | null | undefined, moneda: string): string {
   if (!date) return "-";
-  const moneda = await getMoneda();
   return new Intl.DateTimeFormat(localeDesdeMoneda(moneda), {
     dateStyle: "short",
   }).format(date);
 }
 
-export async function formatCurrency(
-  amount: number | null | undefined
-): Promise<string> {
+export function formatCurrency(
+  amount: number | null | undefined,
+  moneda: string
+): string {
   if (amount == null) return "-";
-  const moneda = await getMoneda();
   return new Intl.NumberFormat(localeDesdeMoneda(moneda), {
     style: "currency",
     currency: moneda,

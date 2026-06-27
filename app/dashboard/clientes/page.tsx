@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { getClientes } from "@/lib/actions/clientes";
-import { formatDateShort } from "@/lib/utils";
+import { formatDateShort, getMoneda } from "@/lib/utils";
 
 export default async function ClientesPage(props: {
   searchParams: Promise<{ q?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const clientes = await getClientes(searchParams.q);
+  const [clientes, moneda] = await Promise.all([
+    getClientes(searchParams.q),
+    getMoneda(),
+  ]);
 
   return (
     <>
@@ -47,13 +50,13 @@ export default async function ClientesPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {await Promise.all(clientes.map(async (c) => (
+                {clientes.map((c) => (
                   <tr key={c.id}>
                     <td>{c.nombre}</td>
                     <td>{c.telefono ?? "-"}</td>
                     <td>{c.email ?? "-"}</td>
                     <td>{c._count.ordenes}</td>
-                    <td>{await formatDateShort(c.createdAt)}</td>
+                    <td>{formatDateShort(c.createdAt, moneda)}</td>
                     <td>
                       <Link
                         href={`/dashboard/clientes/${c.id}`}
@@ -63,7 +66,7 @@ export default async function ClientesPage(props: {
                       </Link>
                     </td>
                   </tr>
-                )))}
+                ))}
               </tbody>
             </table>
           </div>

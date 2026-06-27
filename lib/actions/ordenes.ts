@@ -51,6 +51,10 @@ export async function getOrden(id: string) {
         orderBy: { createdAt: "desc" },
         include: { tecnico: { select: { nombre: true } } },
       },
+      historial: {
+        orderBy: { createdAt: "desc" },
+        include: { usuario: { select: { nombre: true } } },
+      },
     },
   });
 }
@@ -121,19 +125,29 @@ export async function cambiarEstado(formData: FormData) {
     };
   }
 
-  await prisma.orden.update({
-    where: { id: ordenId },
-    data: {
-      estado: nuevoEstado,
-      ...(nuevoEstado === "ENTREGADO" && {
-        fechaEntrega: new Date(),
-        entregadoPorId: session.userId,
-      }),
-      ...(trabajoRealizado && { trabajoRealizado }),
-      ...(notasEntrega && { notasEntrega }),
-      ...(costo != null && { costo }),
-    },
-  });
+  await prisma.$transaction([
+    prisma.orden.update({
+      where: { id: ordenId },
+      data: {
+        estado: nuevoEstado,
+        ...(nuevoEstado === "ENTREGADO" && {
+          fechaEntrega: new Date(),
+          entregadoPorId: session.userId,
+        }),
+        ...(trabajoRealizado && { trabajoRealizado }),
+        ...(notasEntrega && { notasEntrega }),
+        ...(costo != null && { costo }),
+      },
+    }),
+    prisma.historialEstado.create({
+      data: {
+        ordenId,
+        estadoAnterior: orden.estado,
+        estadoNuevo: nuevoEstado,
+        usuarioId: session.userId,
+      },
+    }),
+  ]);
 
   revalidatePath(`/dashboard/ordenes/${ordenId}`);
   revalidatePath("/dashboard/ordenes");

@@ -3,6 +3,7 @@ import { getOrdenes } from "@/lib/actions/ordenes";
 import {
   ESTADO_LABELS,
   formatDateShort,
+  getMoneda,
   ordenEstaAtrasada,
 } from "@/lib/utils";
 
@@ -10,7 +11,10 @@ export default async function OrdenesPage(props: {
   searchParams: Promise<{ q?: string; estado?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const ordenes = await getOrdenes(searchParams.q, searchParams.estado);
+  const [ordenes, moneda] = await Promise.all([
+    getOrdenes(searchParams.q, searchParams.estado),
+    getMoneda(),
+  ]);
 
   return (
     <>
@@ -60,7 +64,7 @@ export default async function OrdenesPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {await Promise.all(ordenes.map(async (o) => {
+                {ordenes.map((o) => {
                   const atrasada = ordenEstaAtrasada(o.estado, o.fechaPrometida);
                   return (
                     <tr key={o.id} className={atrasada ? "row-atrasada" : ""}>
@@ -75,14 +79,14 @@ export default async function OrdenesPage(props: {
                           {atrasada && " ⏰"}
                         </span>
                       </td>
-                      <td>{await formatDateShort(o.createdAt)}</td>
+                      <td>{formatDateShort(o.createdAt, moneda)}</td>
                       <td>
                         <span
                           className={
                             atrasada ? "text-danger" : "text-muted"
                           }
                         >
-                          {await formatDateShort(o.fechaPrometida)}
+                          {formatDateShort(o.fechaPrometida, moneda)}
                         </span>
                       </td>
                       <td>
@@ -95,7 +99,7 @@ export default async function OrdenesPage(props: {
                       </td>
                     </tr>
                   );
-                }))}
+                })}
               </tbody>
             </table>
           </div>

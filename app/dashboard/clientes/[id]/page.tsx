@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCliente } from "@/lib/actions/clientes";
-import { ESTADO_LABELS, formatDate, formatDateShort } from "@/lib/utils";
+import { ESTADO_LABELS, formatDate, formatDateShort, getMoneda } from "@/lib/utils";
 
 export default async function ClienteDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
-  const cliente = await getCliente(id);
+  const [cliente, moneda] = await Promise.all([getCliente(id), getMoneda()]);
   if (!cliente) notFound();
 
   return (
@@ -45,7 +45,7 @@ export default async function ClienteDetailPage(props: {
             </div>
             <div className="detail-field">
               <span className="detail-label">Registrado</span>
-              <span>{await formatDate(cliente.createdAt)}</span>
+              <span>{formatDate(cliente.createdAt, moneda)}</span>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default async function ClienteDetailPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {await Promise.all(cliente.ordenes.map(async (o) => (
+                {cliente.ordenes.map((o) => (
                   <tr key={o.id}>
                     <td>#{o.folio}</td>
                     <td>{o.tipoEquipo}</td>
@@ -78,7 +78,7 @@ export default async function ClienteDetailPage(props: {
                         {ESTADO_LABELS[o.estado]}
                       </span>
                     </td>
-                    <td>{await formatDateShort(o.createdAt)}</td>
+                    <td>{formatDateShort(o.createdAt, moneda)}</td>
                     <td>{o.recibidoPor.nombre}</td>
                     <td>
                       <Link
@@ -89,7 +89,7 @@ export default async function ClienteDetailPage(props: {
                       </Link>
                     </td>
                   </tr>
-                )))}
+                ))}
               </tbody>
             </table>
           </div>

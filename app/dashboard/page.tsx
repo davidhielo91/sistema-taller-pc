@@ -1,11 +1,14 @@
 import { getUser } from "@/lib/dal";
 import { getDashboardStats } from "@/lib/actions/dashboard";
-import { ESTADO_LABELS, formatDateShort } from "@/lib/utils";
+import { ESTADO_LABELS, formatDateShort, getMoneda } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function DashboardPage() {
-  const user = await getUser();
-  const { conteos, atrasadas } = await getDashboardStats();
+  const [user, { conteos, atrasadas }, moneda] = await Promise.all([
+    getUser(),
+    getDashboardStats(),
+    getMoneda(),
+  ]);
 
   const total = Object.values(conteos).reduce((a, b) => a + b, 0);
 
@@ -53,7 +56,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {await Promise.all(atrasadas.map(async (o) => (
+                {atrasadas.map((o) => (
                   <tr key={o.id} className="row-atrasada">
                     <td className="folio-cell">#{o.folio}</td>
                     <td>{o.cliente.nombre}</td>
@@ -65,7 +68,7 @@ export default async function DashboardPage() {
                       </span>
                     </td>
                     <td className="text-danger">
-                      {await formatDateShort(o.fechaPrometida)}
+                      {formatDateShort(o.fechaPrometida, moneda)}
                     </td>
                     <td>
                       <Link
@@ -76,7 +79,7 @@ export default async function DashboardPage() {
                       </Link>
                     </td>
                   </tr>
-                )))}
+                ))}
               </tbody>
             </table>
           </div>

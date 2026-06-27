@@ -677,3 +677,41 @@ body {
 .form-card-inner {
   margin-top: 1rem;
 }
+
+/* Timeline (bitácora de estados) */
+.timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timeline-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.timeline-fecha {
+  color: #6b7280;
+  min-width: 12rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-evento {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.timeline-arrow {
+  color: #9ca3af;
+}
+
+.timeline-usuario {
+  color: #374151;
+  font-weight: 500;
+}

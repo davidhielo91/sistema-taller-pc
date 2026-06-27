@@ -1,5 +1,63 @@
 # Changelog
 
+## [1.1.0] — 2026-06-27
+
+### Añadido — Bitácora de estados (v1.1, sección 1)
+
+- **Modelo `HistorialEstado`**: nueva tabla en la base de datos que registra cada cambio de estado de una orden (estado anterior, estado nuevo, usuario y fecha/hora). La migración `20260627000000_add_historial_estado` es aditiva; las órdenes existentes quedan sin historial retroactivo.
+- **Transacción atómica en `cambiarEstado`**: la actualización del estado de la orden y la inserción en `HistorialEstado` se realizan ahora dentro de un `prisma.$transaction`, garantizando que nunca queden desincronizados.
+- **Línea de tiempo en el detalle de la orden**: sección "Bitácora de cambios" al final de la página, mostrando los cambios del más reciente al más antiguo, con fecha/hora (`formatDate`), transición de estado y nombre del técnico.
+- CSS para la línea de tiempo (`.timeline`, `.timeline-item`, etc.) en `app/globals.css`.
+
+### Notas de actualización
+
+- Esta versión incluye un cambio de base de datos. Al actualizar, el contenedor ejecutará la nueva migración automáticamente en el arranque (comportamiento turnkey sin pasos manuales). Se recomienda hacer un respaldo antes de actualizar.
+
+## [1.0.5] — 2026-06-26
+
+### Corregido — Despliegue
+
+- **Bug bloqueante en EasyPanel:** el Dockerfile usaba `CMD ["node", "server.js"]` sin correr migraciones; en EasyPanel el contenedor arrancaba sin tablas y la app crasheaba inmediatamente. Corregido con `ENTRYPOINT` propio.
+- **Bug bloqueante en Docker local:** el `entrypoint:` de `docker-compose.yml` llamaba `npx prisma` y `npx tsx` que no existen en el runner standalone (son devDependencies). Ahora el Dockerfile provee el entrypoint y las herramientas necesarias directamente.
+- **Cliente generado de Prisma ausente en standalone:** el output standalone de Next.js no garantiza la inclusión de `node_modules/.prisma/client/` (el cliente generado por `prisma generate`); se añadió una copia explícita desde el builder en el Dockerfile.
+
+### Añadido
+
+- `entrypoint.sh`: script de inicio que ejecuta `prisma migrate deploy` → seed → servidor en el arranque del contenedor. Garantiza comportamiento idéntico en local y en producción (EasyPanel).
+- En el builder stage del Dockerfile: compilación de `prisma/seed.ts` → `prisma/seed.cjs` con esbuild, eliminando la necesidad de `tsx` en el runner de producción.
+- En el runner stage del Dockerfile: copia explícita del CLI de Prisma desde el stage `deps` (binarios Alpine compatibles) para que `prisma migrate deploy` funcione.
+- `docker-compose.yml` simplificado: eliminado el `entrypoint:` redundante; ambos entornos usan ahora el mismo `entrypoint.sh` del Dockerfile.
+
+### Mejorado
+
+- `.env.example` reescrito con comentarios detallados, instrucciones para generar `SESSION_SECRET`, y advertencias visibles sobre variables que deben cambiarse antes de producción.
+- `README.md` reescrito en español con instrucciones paso a paso para no-desarrolladores: arranque local con Docker en Windows, despliegue completo en EasyPanel (PostgreSQL interno, variables, dominio/SSL), actualización sin pérdida de datos, y respaldos de la base de datos.
+
+### Riesgos señalados (sin implementar — decisión del operador)
+
+- `DATABASE_URL` en EasyPanel: el hostname interno del servicio varía; el usuario debe copiarlo del panel.
+- PostgreSQL con SSL requerido: agregar `?sslmode=require` a `DATABASE_URL` si el proveedor lo exige.
+- "Start command" en EasyPanel: debe dejarse vacío para no sobreescribir el `ENTRYPOINT` del Dockerfile.
+- `prisma migrate deploy` añade ~2–4 s de latencia a cada reinicio del contenedor (comportamiento esperado).
+
+## [1.0.4] — 2026-06-26
+
+### Corregido
+
+- **Bug bloqueante:** crear cliente nuevo desde "Nueva orden" siempre enviaba datos vacíos (el `FormData` apuntaba a un `<div>` oculto con inputs vacíos en vez del `<form>` con los inputs reales); convertido a `<form>` con los nombres correctos
+- **Bug bloqueante:** `EditarClientePage` era un Client Component que no cargaba los datos actuales del cliente; convertido a Server Component que pre-rellena todos los campos
+- **Rendimiento bloqueante:** `formatDate`, `formatDateShort` y `formatCurrency` en `lib/utils.ts` eran `async` y llamaban a `getMoneda()` (una query SQL) en cada invocación; refactorizadas a síncronas con parámetro `moneda`; cada página ahora obtiene la moneda una sola vez con `getMoneda()` y la pasa a las funciones, eliminando N+1 queries en todos los listados
+- **Rendimiento importante:** `getDashboardStats` hacía 9 `COUNT` queries independientes (una por estado); reemplazado por un único `prisma.orden.groupBy`
+- **Seguridad importante:** `proxy.ts` no bloqueaba rutas de ADMIN; agregada verificación de rol para `/dashboard/ajustes` y `/dashboard/usuarios`, redirigiendo a técnicos al dashboard
+- **UI importante:** link "Dashboard" en la barra lateral estaba siempre activo por usar `pathname.startsWith("/dashboard")`; corregido para usar igualdad exacta en ese caso
+- **Accesibilidad:** links activos en `Sidebar` ahora incluyen `aria-current="page"`
+- **Feedback:** `AprobarDiagnostico` ahora muestra mensajes de error de la server action en la UI en vez de descartarlos silenciosamente
+
+### Cambiado
+
+- `CambioEstadoSchema` usa `z.nativeEnum(EstadoOrden)` en vez de `z.enum([...])` manual para evitar desincronización con el enum de Prisma
+- Eliminado código muerto `if (!session) return null` en `getUser()` de `lib/dal.ts` (nunca se alcanzaba porque `verifySession()` redirige antes de retornar)
+
 ## [1.0.3] — 2026-06-26
 
 ### Mejorado

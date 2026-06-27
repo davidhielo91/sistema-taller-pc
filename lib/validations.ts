@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EstadoOrden } from "@prisma/client";
 
 export const ClienteSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido").trim(),
@@ -28,17 +29,7 @@ export type OrdenInput = z.infer<typeof OrdenSchema>;
 
 export const CambioEstadoSchema = z.object({
   ordenId: z.string(),
-  nuevoEstado: z.enum([
-    "RECIBIDO",
-    "EN_DIAGNOSTICO",
-    "PRESUPUESTADO",
-    "APROBADO",
-    "EN_REPARACION",
-    "LISTO",
-    "ENTREGADO",
-    "NO_APROBADO",
-    "CANCELADO",
-  ]),
+  nuevoEstado: z.nativeEnum(EstadoOrden),
   trabajoRealizado: z.string().nullable().optional(),
   notasEntrega: z.string().nullable().optional(),
   costo: z.number().nullable().optional(),

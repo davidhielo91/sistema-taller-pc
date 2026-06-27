@@ -32,9 +32,10 @@ model Usuario {
   activo       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
-  ordenesRecibidas  Orden[]        @relation("Recepcion")
-  ordenesEntregadas Orden[]        @relation("Entrega")
+  ordenesRecibidas  Orden[]           @relation("Recepcion")
+  ordenesEntregadas Orden[]           @relation("Entrega")
   diagnosticos      Diagnostico[]
+  historial         HistorialEstado[]
 }
 
 model Cliente {
@@ -83,6 +84,7 @@ model Orden {
   entregadoPorId String?
 
   diagnosticos Diagnostico[]
+  historial    HistorialEstado[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,6 +104,17 @@ model Diagnostico {
   tecnicoId String
 
   createdAt DateTime @default(now())
+}
+
+model HistorialEstado {
+  id             String       @id @default(cuid())
+  orden          Orden        @relation(fields: [ordenId], references: [id])
+  ordenId        String
+  estadoAnterior EstadoOrden?
+  estadoNuevo    EstadoOrden
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  usuarioId      String
+  createdAt      DateTime     @default(now())
 }
 
 model Ajustes {

@@ -7,6 +7,15 @@ import type { EstadoOrden } from "@prisma/client";
 export async function getDashboardStats() {
   await verifySession();
 
+  const grupoConteos = await prisma.orden.groupBy({
+    by: ["estado"],
+    _count: { id: true },
+  });
+
+  const conteos = Object.fromEntries(
+    grupoConteos.map(({ estado, _count }) => [estado, _count.id])
+  ) as Partial<Record<EstadoOrden, number>>;
+
   const estados: EstadoOrden[] = [
     "RECIBIDO",
     "EN_DIAGNOSTICO",
@@ -18,15 +27,8 @@ export async function getDashboardStats() {
     "NO_APROBADO",
     "CANCELADO",
   ];
-
-  const counts = await Promise.all(
-    estados.map((estado) =>
-      prisma.orden.count({ where: { estado } })
-    )
-  );
-
-  const conteos = Object.fromEntries(
-    estados.map((estado, i) => [estado, counts[i]])
+  const conteosCompletos = Object.fromEntries(
+    estados.map((e) => [e, conteos[e] ?? 0])
   ) as Record<EstadoOrden, number>;
 
   const atrasadas = await prisma.orden.findMany({
@@ -41,5 +43,5 @@ export async function getDashboardStats() {
     },
   });
 
-  return { conteos, atrasadas };
+  return { conteos: conteosCompletos, atrasadas };
 }

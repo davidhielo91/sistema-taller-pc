@@ -83,26 +83,28 @@ export default function NuevaOrdenPage() {
           ) : showNewClient ? (
             <div className="new-client-form">
               <p className="text-muted">Datos del nuevo cliente:</p>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="cli_nombre">Nombre *</label>
-                  <input id="cli_nombre" name="cli_nombre" required />
+              <form id="new-client-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="cli_nombre">Nombre *</label>
+                    <input id="cli_nombre" name="nombre" required />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cli_telefono">Teléfono</label>
+                    <input id="cli_telefono" name="telefono" type="tel" />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="cli_telefono">Teléfono</label>
-                  <input id="cli_telefono" name="cli_telefono" type="tel" />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="cli_email">Email</label>
+                    <input id="cli_email" name="email" type="email" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cli_documento">Documento</label>
+                    <input id="cli_documento" name="documento" />
+                  </div>
                 </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="cli_email">Email</label>
-                  <input id="cli_email" name="cli_email" type="email" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="cli_documento">Documento</label>
-                  <input id="cli_documento" name="cli_documento" />
-                </div>
-              </div>
+              </form>
               <button
                 type="button"
                 className="btn-secondary btn-sm"
@@ -127,12 +129,6 @@ export default function NuevaOrdenPage() {
               >
                 Buscar cliente existente
               </button>
-              <div id="new-client-form">
-                <input type="hidden" name="nombre" />
-                <input type="hidden" name="telefono" />
-                <input type="hidden" name="email" />
-                <input type="hidden" name="documento" />
-              </div>
             </div>
           ) : showSearch ? (
             <div className="client-search">

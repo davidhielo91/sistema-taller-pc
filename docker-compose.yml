@@ -30,12 +30,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    entrypoint: >
-      sh -c "
-        npx prisma migrate deploy &&
-        npx prisma db seed &&
-        node server.js
-      "
+    # Sin 'entrypoint' aquí: el ENTRYPOINT del Dockerfile se encarga de
+    # las migraciones, el seed y el arranque del servidor.
+    # Esto garantiza el mismo comportamiento en local y en EasyPanel.
 
 volumes:
   pgdata:

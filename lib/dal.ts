@@ -18,7 +18,6 @@ export const verifySession = cache(async () => {
 
 export const getUser = cache(async () => {
   const session = await verifySession();
-  if (!session) return null;
 
   try {
     const user = await prisma.usuario.findUnique({
