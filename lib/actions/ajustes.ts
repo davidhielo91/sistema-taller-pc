@@ -11,6 +11,8 @@ const AjustesSchema = z.object({
   telefono: z.string().nullable().optional(),
   direccion: z.string().nullable().optional(),
   logoUrl: z.string().nullable().optional(),
+  codigoPaisWhatsapp: z.string().nullable().optional(),
+  mensajeWhatsappListo: z.string().nullable().optional(),
 });
 
 export async function getAjustes() {
@@ -30,6 +32,8 @@ export async function updateAjustes(formData: FormData) {
     telefono: raw.telefono || null,
     direccion: raw.direccion || null,
     logoUrl: raw.logoUrl || null,
+    codigoPaisWhatsapp: raw.codigoPaisWhatsapp || null,
+    mensajeWhatsappListo: raw.mensajeWhatsappListo || null,
   });
 
   if (!parsed.success) {

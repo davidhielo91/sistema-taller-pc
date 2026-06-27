@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrden } from "@/lib/actions/ordenes";
+import { getAjustes } from "@/lib/actions/ajustes";
 import {
   ESTADO_LABELS,
   ESTADO_PAGO_LABELS,
   TRANSICIONES,
   ordenEstaAtrasada,
   esEstadoTerminal,
+  buildWhatsAppUrl,
 } from "@/lib/utils";
-import { formatDate, formatDateShort, formatCurrency, getMoneda } from "@/lib/format";
+import { formatDate, formatDateShort, formatCurrency } from "@/lib/format";
 import { PagoForm } from "./PagoForm";
 import { CambiarEstadoForm } from "./CambiarEstadoForm";
 import { DiagnosticoForm } from "./DiagnosticoForm";
@@ -19,10 +21,10 @@ export default async function OrdenDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
-  const orden = await getOrden(id);
+  const [orden, ajustes] = await Promise.all([getOrden(id), getAjustes()]);
   if (!orden) notFound();
 
-  const moneda = await getMoneda();
+  const moneda = ajustes?.moneda ?? "MXN";
   const atrasada = ordenEstaAtrasada(orden.estado, orden.fechaPrometida);
   const totalPagado = orden.pagos.reduce((acc, p) => acc + Number(p.monto), 0);
   const saldo =
@@ -46,13 +48,33 @@ export default async function OrdenDetailPage(props: {
             {ESTADO_LABELS[orden.estado]}
           </span>
         </div>
-        <Link
-          href={`/comprobante/${id}`}
-          target="_blank"
-          className="btn-secondary btn-sm"
-        >
-          Comprobante PDF
-        </Link>
+        <div className="header-actions">
+          <Link href={`/comprobante/${id}`} target="_blank" className="btn-secondary btn-sm">
+            Comprobante PDF
+          </Link>
+          <Link href={`/etiqueta/${id}`} target="_blank" className="btn-secondary btn-sm">
+            Etiqueta
+          </Link>
+          {orden.cliente.telefono && (
+            <a
+              href={buildWhatsAppUrl(
+                orden.cliente.telefono,
+                ajustes?.codigoPaisWhatsapp,
+                ajustes?.mensajeWhatsappListo,
+                {
+                  nombre: orden.cliente.nombre,
+                  tipoEquipo: orden.tipoEquipo,
+                  folio: orden.folio,
+                }
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-whatsapp btn-sm"
+            >
+              Avisar por WhatsApp
+            </a>
+          )}
+        </div>
       </header>
       <div className="content-body">
         <div className="detail-grid-2col">

@@ -17,6 +17,7 @@ export function Sidebar({
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/ordenes", label: "Órdenes" },
     { href: "/dashboard/clientes", label: "Clientes" },
+    { href: "/dashboard/reportes", label: "Reportes" },
     ...(rol === "ADMIN"
       ? [
           { href: "/dashboard/ajustes", label: "Ajustes" },

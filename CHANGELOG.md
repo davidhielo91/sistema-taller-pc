@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.1.3] — 2026-06-27
+
+### Añadido — WhatsApp, etiqueta imprimible y reportes (v1.1, secciones 3–5)
+
+#### Sección 3 — Aviso por WhatsApp
+
+- **Dos campos nuevos en `Ajustes`** (solo ADMIN): `codigoPaisWhatsapp` (código de país que se antepone al teléfono si no empieza con +) y `mensajeWhatsappListo` (plantilla de mensaje con variables `{cliente}`, `{tipoEquipo}`, `{folio}`). Migración aditiva `20260627020000_add_ajustes_whatsapp`.
+- **Botón "Avisar por WhatsApp"** en el detalle de la orden, visible únicamente si el cliente tiene teléfono registrado. Abre `wa.me/{numero}?text=...` en nueva pestaña — sin API externa, solo un link HTML. El número se limpia (espacios, guiones, paréntesis) y se le antepone el código de país si corresponde.
+- **`buildWhatsAppUrl`** exportada desde `lib/utils.ts` como función pura (sin efectos secundarios, segura para bundle cliente).
+
+#### Sección 4 — Etiqueta imprimible
+
+- **Nueva ruta `/etiqueta/[id]`** fuera del layout del dashboard (mismo patrón que `/comprobante/[id]`). Verifica sesión via `decrypt(cookie)`.
+- Contenido compacto optimizado para impresión: folio grande, nombre del cliente, tipo/marca/modelo del equipo, fecha de ingreso y nombre del taller.
+- **Botón "Etiqueta"** en el detalle de la orden, abre la etiqueta en nueva pestaña junto a "Comprobante PDF".
+
+#### Sección 5 — Reportes básicos
+
+- **Nueva página `/dashboard/reportes`** (Server Component, accesible para todos los roles). Filtro de rango de fechas por query string (`desde`, `hasta`); por defecto muestra el mes en curso.
+- Muestra: **ingresos del período** (suma de `Pago.monto`), **reparaciones entregadas** (count de `Orden` donde `estado=ENTREGADO` y `fechaEntrega` en rango), **tiempo promedio de entrega** en días, desglose de entregas **por técnico** y tabla con el detalle de cada orden entregada.
+- Sin librerías de gráficas — solo tablas HTML con formato de la moneda configurada.
+- **`lib/actions/reportes.ts`** — acción `getReportes(desde, hasta)` con dos queries en `Promise.all`.
+- **Enlace "Reportes"** agregado al sidebar para todos los usuarios.
+
+#### Otros cambios
+
+- `app/dashboard/ordenes/[id]/page.tsx`: sustituye la doble carga de `Ajustes` (primero `getMoneda`, luego para WhatsApp) por un único `Promise.all([getOrden, getAjustes])`. La moneda se deriva de `ajustes?.moneda`.
+- CSS nuevos: `.header-actions`, `.btn-whatsapp`, `.reportes-resumen`, `.reporte-card`, `.reporte-label`, `.reporte-valor`, `.form-hint`.
+
+### Notas de actualización
+
+- Esta versión incluye un cambio de base de datos (`ALTER TABLE Ajustes`). El contenedor aplica la migración automáticamente al arrancar. Sin pérdida de datos. Hacer respaldo antes de actualizar.
+
 ## [1.1.2] — 2026-06-27
 
 ### Corregido — Error de build "Module not found: Can't resolve 'dns'"

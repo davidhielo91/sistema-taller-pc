@@ -66,3 +66,22 @@ export function calcularEstadoPago(
   if (totalPagado >= costo) return "PAGADO";
   return "ABONADO";
 }
+
+export function buildWhatsAppUrl(
+  telefono: string,
+  codigoPais: string | null | undefined,
+  plantilla: string | null | undefined,
+  vars: { nombre: string; tipoEquipo: string; folio: number }
+): string {
+  let numero = telefono.replace(/[\s\-\(\)]/g, "");
+  if (!numero.startsWith("+") && codigoPais) {
+    numero = `${codigoPais}${numero}`;
+  }
+  const mensaje = plantilla
+    ? plantilla
+        .replace("{cliente}", vars.nombre)
+        .replace("{tipoEquipo}", vars.tipoEquipo)
+        .replace("{folio}", String(vars.folio))
+    : `Hola ${vars.nombre}, le informamos que su ${vars.tipoEquipo} (folio #${vars.folio}) está listo para recoger.`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+}

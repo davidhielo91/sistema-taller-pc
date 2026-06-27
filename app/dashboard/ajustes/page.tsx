@@ -12,6 +12,8 @@ export default function AjustesPage() {
     telefono: string | null;
     direccion: string | null;
     logoUrl: string | null;
+    codigoPaisWhatsapp: string | null;
+    mensajeWhatsappListo: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -84,6 +86,33 @@ export default function AjustesPage() {
               defaultValue={initial?.logoUrl ?? ""}
               placeholder="https://ejemplo.com/logo.png"
             />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="codigoPaisWhatsapp">Código de país WhatsApp</label>
+              <input
+                id="codigoPaisWhatsapp"
+                name="codigoPaisWhatsapp"
+                defaultValue={initial?.codigoPaisWhatsapp ?? ""}
+                placeholder="52 (México), 54 (Argentina)…"
+              />
+              <span className="form-hint">
+                Se antepone al teléfono del cliente si no empieza con +
+              </span>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="mensajeWhatsappListo">Mensaje WhatsApp (plantilla)</label>
+            <textarea
+              id="mensajeWhatsappListo"
+              name="mensajeWhatsappListo"
+              rows={3}
+              defaultValue={initial?.mensajeWhatsappListo ?? ""}
+              placeholder="Hola {cliente}, su {tipoEquipo} (folio #{folio}) está listo para recoger."
+            />
+            <span className="form-hint">
+              Variables disponibles: {"{cliente}"}, {"{tipoEquipo}"}, {"{folio}"}
+            </span>
           </div>
 
           {state?.message && <p className="form-error">{state.message}</p>}
