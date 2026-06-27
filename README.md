@@ -5,6 +5,28 @@ Cada taller despliega su propia copia con su propia base de datos (no hay datos 
 
 ---
 
+## Funcionalidades
+
+### v1.0 — Base completa
+
+- **Clientes:** registro y búsqueda por nombre, teléfono o email.
+- **Órdenes de trabajo:** recepción de equipos con folio autoincremental, datos del equipo, falla reportada y accesorios entregados.
+- **Máquina de estados:** 9 estados (`Recibido → En diagnóstico → Presupuestado → Aprobado → En reparación → Listo → Entregado`, con ramas de rechazo y cancelación). Alertas visuales de órdenes atrasadas.
+- **Diagnósticos:** registro de hallazgos, solución propuesta y costo estimado. Aprobación/rechazo del cliente desde la misma vista.
+- **Nota de entrega:** costo, trabajo realizado y notas al momento de entregar.
+- **Comprobante de ingreso:** página de impresión/PDF con datos del taller, folio, equipo y fechas.
+- **Ajustes del taller:** nombre, moneda (ISO 4217), teléfono y dirección. Solo ADMIN.
+- **Gestión de usuarios:** crear técnicos y administradores, activar/desactivar, cambiar rol. Solo ADMIN.
+- **Dashboard:** conteo de órdenes por estado y lista de las 10 más atrasadas.
+- **Multi-moneda:** los montos y fechas se formatean según la moneda configurada (MXN, ARS, COP, USD, EUR, etc.).
+
+### v1.1 — Trazabilidad y pagos
+
+- **Bitácora de estados:** cada cambio de estado queda registrado con fecha, hora y técnico. Se muestra como línea de tiempo en el detalle de la orden.
+- **Pagos y abonos:** registro de cobros parciales o totales (monto, método, nota). La orden muestra costo total, total abonado y saldo pendiente. Estado de pago (`Sin pagar / Abonado / Pagado`) visible en el listado con filtro.
+
+---
+
 ## Tabla de contenidos
 
 1. [Antes de empezar — Variables de entorno](#1-antes-de-empezar--variables-de-entorno)
@@ -201,6 +223,16 @@ docker compose up --build
 Las migraciones de base de datos se aplican automáticamente al reiniciar. Revisa el `CHANGELOG.md` para saber si la versión que descargaste incluye cambios en la base de datos.
 
 > Los datos existentes no se pierden. Las migraciones solo agregan o modifican la estructura — nunca eliminan datos.
+
+### En local sin Docker (solo desarrolladores)
+
+Si corres la app directamente con `npm run dev` (sin Docker), debes aplicar las migraciones manualmente después de hacer `git pull`:
+
+```bash
+git pull
+npm run db:migrate   # aplica las migraciones pendientes
+npm run dev
+```
 
 ### En EasyPanel
 

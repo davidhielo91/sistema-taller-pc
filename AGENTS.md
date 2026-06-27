@@ -57,133 +57,31 @@ Es una herramienta **interna del taller**, no un sistema de facturación.
 
 ## 4. Modelo de datos
 
-Cinco entidades: **Usuario, Cliente, Orden, Diagnostico, Ajustes**.
+El esquema completo y actualizado vive en `prisma/schema.prisma` — esa es la fuente de verdad.
+Las entidades actuales son: **Usuario, Cliente, Orden, Diagnostico, Ajustes, HistorialEstado, Pago**.
 
 Esquema de referencia en Prisma (ajustable en detalles, no en su esencia):
 
-```prisma
-// Roles de usuario
-enum Rol {
-  ADMIN
-  TECNICO
-}
+El esquema de referencia completo está en `prisma/schema.prisma`. Resumen de entidades y campos clave:
 
-// Estados de una orden (máquina de estados, ver sección 5)
-enum EstadoOrden {
-  RECIBIDO
-  EN_DIAGNOSTICO
-  PRESUPUESTADO
-  APROBADO
-  EN_REPARACION
-  LISTO
-  ENTREGADO
-  NO_APROBADO
-  CANCELADO
-}
-
-model Usuario {
-  id           String   @id @default(cuid())
-  nombre       String
-  email        String   @unique
-  passwordHash String
-  rol          Rol      @default(TECNICO)
-  activo       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-
-  ordenesRecibidas  Orden[]        @relation("Recepcion")
-  ordenesEntregadas Orden[]        @relation("Entrega")
-  diagnosticos      Diagnostico[]
-}
-
-model Cliente {
-  id        String   @id @default(cuid())
-  nombre    String
-  telefono  String?
-  email     String?
-  documento String?  // campo libre opcional (ID local); NO es para facturación
-  notas     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  ordenes Orden[]
-}
-
-model Orden {
-  id        String   @id @default(cuid())
-  folio     Int      @unique @default(autoincrement()) // número legible para el cliente
-
-  cliente   Cliente  @relation(fields: [clienteId], references: [id])
-  clienteId String
-
-  // Datos del equipo
-  tipoEquipo  String   // laptop, PC de escritorio, etc.
-  marca       String?
-  modelo      String?
-  serie       String?
-  accesorios  String?  // qué deja el cliente (cargador, mochila, etc.)
-
-  // Recepción
-  fallaReportada String
-  estadoFisico   String?  // golpes, rayones, etc.
-  notasRecepcion String?
-  contrasenaEquipo String? // opcional, para poder probar el equipo
-
-  // Tiempos
-  fechaIngreso   DateTime @default(now())
-  fechaPrometida DateTime?
-  fechaEntrega   DateTime?
-
-  // Flujo
-  estado EstadoOrden @default(RECIBIDO)
-  costo  Decimal?    @db.Decimal(12, 2) // monto cobrado; moneda viene de Ajustes
-
-  // Entrega
-  trabajoRealizado String?
-  notasEntrega     String?
-
-  recibidoPor   Usuario  @relation("Recepcion", fields: [recibidoPorId], references: [id])
-  recibidoPorId String
-  entregadoPor   Usuario? @relation("Entrega", fields: [entregadoPorId], references: [id])
-  entregadoPorId String?
-
-  diagnosticos Diagnostico[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Diagnostico {
-  id      String @id @default(cuid())
-  orden   Orden  @relation(fields: [ordenId], references: [id])
-  ordenId String
-
-  hallazgos        String
-  solucionPropuesta String?
-  costoEstimado    Decimal? @db.Decimal(12, 2)
-  aprobado         Boolean? // null = pendiente, true = aprobado, false = rechazado
-
-  tecnico   Usuario @relation(fields: [tecnicoId], references: [id])
-  tecnicoId String
-
-  createdAt DateTime @default(now())
-}
-
-// Singleton: una sola fila con la configuración del taller
-model Ajustes {
-  id          Int     @id @default(1)
-  nombreTaller String
-  moneda      String  @default("MXN") // código ISO 4217: MXN, ARS, COP, USD, etc.
-  telefono    String?
-  direccion   String?
-  logoUrl     String?
-}
-```
+- **`Rol`** enum: `ADMIN | TECNICO`
+- **`EstadoOrden`** enum: `RECIBIDO | EN_DIAGNOSTICO | PRESUPUESTADO | APROBADO | EN_REPARACION | LISTO | ENTREGADO | NO_APROBADO | CANCELADO`
+- **`EstadoPago`** enum (v1.1): `PENDIENTE | ABONADO | PAGADO`
+- **`Usuario`**: id, nombre, email, passwordHash, rol, activo, createdAt. Relaciones: ordenesRecibidas, ordenesEntregadas, diagnosticos, historial, pagos.
+- **`Cliente`**: id, nombre, telefono?, email?, documento?, notas?, timestamps. Relación: ordenes.
+- **`Orden`**: folio (autoincr.), clienteId, datos del equipo (tipoEquipo, marca, modelo, serie, accesorios), recepción (fallaReportada, estadoFisico, notasRecepcion, contrasenaEquipo?), tiempos (fechaIngreso, fechaPrometida?, fechaEntrega?), flujo (estado, estadoPago, costo?), entrega (trabajoRealizado?, notasEntrega?), recibidoPorId, entregadoPorId?, timestamps. Relaciones: diagnosticos, historial, pagos.
+- **`Diagnostico`**: hallazgos, solucionPropuesta?, costoEstimado?, aprobado (null=pendiente), tecnicoId, ordenId.
+- **`HistorialEstado`** (v1.1): ordenId, estadoAnterior?, estadoNuevo, usuarioId, createdAt. Registro inmutable de cada transición de estado.
+- **`Pago`** (v1.1): ordenId, monto, metodo?, nota?, usuarioId, createdAt. Registro inmutable de cada cobro.
+- **`Ajustes`**: singleton (id=1). nombreTaller, moneda (ISO 4217), telefono?, direccion?, logoUrl?.
 
 ### Notas del modelo
 - **La moneda es global del taller**, vive en `Ajustes.moneda`. No se elige por orden.
   Todos los montos se muestran formateados con esa moneda (usar `Intl.NumberFormat`).
 - **No hay RFC ni datos fiscales.** El cliente es solo información básica de contacto.
 - `folio` es el número legible que se le da al cliente en la nota de recepción.
+- `HistorialEstado` y `Pago` son registros inmutables (no hay update ni delete). La bitácora arranca desde que se implementó v1.1; las órdenes anteriores no tienen historial retroactivo.
+- `estadoPago` se recalcula automáticamente al registrar un pago o al actualizar el costo de la orden. Regla: sin pagos o costo nulo → `PENDIENTE`; pagos < costo → `ABONADO`; pagos ≥ costo → `PAGADO`.
 
 ---
 
@@ -217,23 +115,36 @@ No hace falta un sistema de permisos granular. Basta con estos dos roles.
 
 ---
 
-## 7. Alcance de la v1
+## 7. Alcance implementado
 
-**Incluido:**
+### v1.0 — Implementada y estable
+
 - CRUD de clientes (datos básicos).
 - Registro de ingreso de equipos (orden + nota de recepción).
 - Diagnósticos asociados a la orden.
 - Máquina de estados + control de tiempos (alertas de atraso en el listado).
 - Nota de entrega.
-- **Comprobante de ingreso en PDF** (básico): datos del taller, folio, cliente, equipo,
-  falla reportada, accesorios, fecha de ingreso y fecha prometida.
+- Comprobante de ingreso (página de impresión/PDF).
 - Configuración del taller (Ajustes) y gestión de usuarios.
+- Dashboard con conteos por estado y órdenes atrasadas.
 
-**Fuera de la v1 (no implementar todavía):**
+### v1.1 — Parcialmente implementada (ver `V1.1.md` para el detalle completo)
+
+**Implementado:**
+- Sección 1: **Bitácora de estados** — `HistorialEstado`, timeline en el detalle de la orden.
+- Sección 2: **Pagos y abonos** — `Pago`, `EstadoPago`, formulario de abono, resumen costo/abonado/saldo, badge y filtro en el listado.
+
+**Pendiente (no implementar sin instrucción explícita):**
+- Sección 3: Aviso por WhatsApp.
+- Sección 4: Etiqueta imprimible.
+- Sección 5: Reportes básicos.
+
+### Fuera de alcance (no implementar)
+
 - Inventario de refacciones.
 - Facturación / documentos fiscales.
 - Fotos del equipo / manejo de archivos subidos.
-- Portal de cara al cliente / notificaciones por WhatsApp o correo.
+- Portal de cara al cliente.
 - Multi-tenancy.
 
 > Si una funcionalidad fuera de alcance "ayudaría", **no la agregues**. Anótala como
@@ -269,19 +180,33 @@ No hace falta un sistema de permisos granular. Basta con estos dos roles.
 
 - TypeScript estricto. Nada de `any` salvo casos justificados.
 - El esquema de Prisma manda: si cambia el modelo, se crea una migración.
-- Validación de entradas en el servidor (p. ej. con `zod`).
+- Validación de entradas en el servidor (con `zod`).
 - Construir por **rebanadas verticales**: una funcionalidad completa de punta a punta
   (formulario → guardado → listado → detalle) antes de pasar a la siguiente.
-- Estructura sugerida de carpetas (App Router):
+- Estructura de carpetas (App Router):
   ```
-  /app            rutas y páginas
-  /app/api        endpoints si se necesitan
-  /lib            db (prisma client), auth, utilidades (formato de moneda/fechas)
-  /components     componentes de UI reutilizables
-  /prisma         schema.prisma, migraciones, seed.ts
-  /docker         Dockerfile, docker-compose.yml
+  /app              rutas y páginas
+  /app/api          endpoints REST si se necesitan
+  /lib              módulos de servidor y utilidades
+  /components       componentes de UI reutilizables
+  /prisma           schema.prisma, migraciones, seed.ts
   ```
+- **Separación cliente / servidor en `lib/`:**
+  - `lib/utils.ts` — helpers **puros**, sin imports de Node.js ni Prisma. Seguro para
+    importar desde componentes cliente. Contiene: `ESTADO_LABELS`, `TRANSICIONES`,
+    `ESTADO_PAGO_LABELS`, `calcularEstadoPago`, `esEstadoTerminal`, `ordenEstaAtrasada`,
+    `localeDesdeMoneda`.
+  - `lib/format.ts` — funciones de formato y acceso a BD. Empieza con
+    `import "server-only"`. Contiene: `getMoneda`, `formatDate`, `formatDateShort`,
+    `formatCurrency`. Si un componente cliente intenta importar este módulo, el build
+    falla de inmediato con mensaje claro.
+  - `lib/actions/` — Server Actions (`"use server"`). Cada archivo agrupa las acciones
+    de una entidad (`ordenes.ts`, `clientes.ts`, `pagos.ts`, etc.).
+  - No mezclar: **nunca** importes `prisma` desde un archivo que pueda ser incluido en
+    el bundle del navegador.
 - Textos de interfaz en español.
+- Las migraciones en desarrollo local se aplican con `npm run db:migrate` después de
+  hacer `git pull`. En Docker y EasyPanel ocurre automáticamente al arrancar.
 
 ---
 
