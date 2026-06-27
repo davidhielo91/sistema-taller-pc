@@ -134,10 +134,10 @@ No hace falta un sistema de permisos granular. Basta con estos dos roles.
 - Sección 1: **Bitácora de estados** — `HistorialEstado`, timeline en el detalle de la orden.
 - Sección 2: **Pagos y abonos** — `Pago`, `EstadoPago`, formulario de abono, resumen costo/abonado/saldo, badge y filtro en el listado.
 
-**Pendiente (no implementar sin instrucción explícita):**
-- Sección 3: Aviso por WhatsApp.
-- Sección 4: Etiqueta imprimible.
-- Sección 5: Reportes básicos.
+**Implementado (v1.1.3):**
+- Sección 3: Aviso por WhatsApp — campos `codigoPaisWhatsapp` y `mensajeWhatsappListo` en `Ajustes`; botón `wa.me` en detalle de orden; `buildWhatsAppUrl` en `lib/utils.ts`.
+- Sección 4: Etiqueta imprimible — ruta `/etiqueta/[id]`, misma autenticación que `/comprobante/[id]`.
+- Sección 5: Reportes básicos — `/dashboard/reportes` con filtro de fechas, tablas, `lib/actions/reportes.ts`.
 
 ### Fuera de alcance (no implementar)
 
