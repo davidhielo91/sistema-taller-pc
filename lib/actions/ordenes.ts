@@ -6,12 +6,23 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { OrdenSchema, CambioEstadoSchema } from "@/lib/validations";
 import { verifySession } from "@/lib/dal";
-import { TRANSICIONES } from "@/lib/utils";
+import { TRANSICIONES, calcularEstadoPago } from "@/lib/utils";
 
-export async function getOrdenes(search?: string, estado?: string) {
+export async function getOrdenes(
+  search?: string,
+  estado?: string,
+  estadoPago?: string
+) {
   await verifySession();
 
   const where: Prisma.OrdenWhereInput = {};
+  if (
+    estadoPago === "PENDIENTE" ||
+    estadoPago === "ABONADO" ||
+    estadoPago === "PAGADO"
+  ) {
+    where.estadoPago = estadoPago;
+  }
   if (search) {
     const orFilters: Prisma.OrdenWhereInput["OR"] = [];
     const folioNum = Number(search);
@@ -53,6 +64,10 @@ export async function getOrden(id: string) {
       },
       historial: {
         orderBy: { createdAt: "desc" },
+        include: { usuario: { select: { nombre: true } } },
+      },
+      pagos: {
+        orderBy: { createdAt: "asc" },
         include: { usuario: { select: { nombre: true } } },
       },
     },
@@ -112,7 +127,10 @@ export async function cambiarEstado(formData: FormData) {
 
   const { ordenId, nuevoEstado, trabajoRealizado, notasEntrega, costo } =
     parsed.data;
-  const orden = await prisma.orden.findUnique({ where: { id: ordenId } });
+  const orden = await prisma.orden.findUnique({
+    where: { id: ordenId },
+    include: { pagos: { select: { monto: true } } },
+  });
 
   if (!orden) {
     return { message: "Orden no encontrada" };
@@ -136,7 +154,13 @@ export async function cambiarEstado(formData: FormData) {
         }),
         ...(trabajoRealizado && { trabajoRealizado }),
         ...(notasEntrega && { notasEntrega }),
-        ...(costo != null && { costo }),
+        ...(costo != null && {
+          costo,
+          estadoPago: calcularEstadoPago(
+            costo,
+            orden.pagos.reduce((acc, p) => acc + Number(p.monto), 0)
+          ),
+        }),
       },
     }),
     prisma.historialEstado.create({

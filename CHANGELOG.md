@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.1] — 2026-06-27
+
+### Añadido — Pagos y abonos (v1.1, sección 2)
+
+- **Enum `EstadoPago`** (`PENDIENTE` / `ABONADO` / `PAGADO`) y campo `estadoPago` en `Orden` (default `PENDIENTE`). Migración aditiva `20260627010000_add_pagos`; las órdenes existentes quedan en `PENDIENTE` automáticamente.
+- **Modelo `Pago`**: registra monto, método (opcional), nota (opcional), usuario y fecha/hora.
+- **Acción `registrarPago`** (`lib/actions/pagos.ts`): crea un `Pago` y actualiza `Orden.estadoPago` en una sola transacción. Validaciones de servidor: monto > 0, orden no cancelada.
+- **Recálculo automático de `estadoPago`** al registrar un abono o al actualizar el costo de la orden (en `cambiarEstado` al marcar como entregada). Regla: sin pagos → `PENDIENTE`; pagos > 0 pero menores al costo → `ABONADO`; pagos ≥ costo → `PAGADO`; si costo es nulo → `PENDIENTE`.
+- **Detalle de la orden**: sección "Pagos y abonos" con badge de estado de pago, resumen (costo total / total abonado / saldo pendiente) formateado con `formatCurrency`, tabla de pagos con fecha, monto, método, nota y técnico, y formulario para registrar abono. El formulario no aparece en órdenes canceladas.
+- **Listado de órdenes**: columna "Pago" con badge de estado, filtro por estado de pago (`estadoPago` en la query string).
+
+### Notas de actualización
+
+- Esta versión incluye un cambio de base de datos (`ALTER TABLE Orden`, nuevo tipo `EstadoPago`, nueva tabla `Pago`). El contenedor aplica la migración automáticamente al arrancar. Hacer respaldo antes de actualizar.
+
 ## [1.1.0] — 2026-06-27
 
 ### Añadido — Bitácora de estados (v1.1, sección 1)

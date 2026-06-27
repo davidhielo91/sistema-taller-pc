@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getOrden } from "@/lib/actions/ordenes";
 import {
   ESTADO_LABELS,
+  ESTADO_PAGO_LABELS,
   TRANSICIONES,
   formatDate,
   formatDateShort,
@@ -11,6 +12,7 @@ import {
   ordenEstaAtrasada,
   esEstadoTerminal,
 } from "@/lib/utils";
+import { PagoForm } from "./PagoForm";
 import { CambiarEstadoForm } from "./CambiarEstadoForm";
 import { DiagnosticoForm } from "./DiagnosticoForm";
 import { RegistrarEntregaForm } from "./RegistrarEntregaForm";
@@ -25,6 +27,9 @@ export default async function OrdenDetailPage(props: {
 
   const moneda = await getMoneda();
   const atrasada = ordenEstaAtrasada(orden.estado, orden.fechaPrometida);
+  const totalPagado = orden.pagos.reduce((acc, p) => acc + Number(p.monto), 0);
+  const saldo =
+    orden.costo != null ? Number(orden.costo) - totalPagado : null;
   const transicionesPosibles = TRANSICIONES[orden.estado];
   const terminal = esEstadoTerminal(orden.estado);
   const puedeEntregar =
@@ -223,6 +228,78 @@ export default async function OrdenDetailPage(props: {
           {!terminal && (
             <div className="section-margin-top">
               <DiagnosticoForm ordenId={id} />
+            </div>
+          )}
+        </div>
+
+        {/* Pagos y abonos */}
+        <div className="detail-card">
+          <div className="pagos-card-header">
+            <h2>Pagos y abonos</h2>
+            <span
+              className={`estado-badge pago-${orden.estadoPago.toLowerCase()}`}
+            >
+              {ESTADO_PAGO_LABELS[orden.estadoPago]}
+            </span>
+          </div>
+
+          <div className="pagos-resumen">
+            <div className="pagos-resumen-item">
+              <span className="detail-label">Costo total</span>
+              <span>
+                {formatCurrency(
+                  orden.costo != null ? Number(orden.costo) : null,
+                  moneda
+                )}
+              </span>
+            </div>
+            <div className="pagos-resumen-item">
+              <span className="detail-label">Total abonado</span>
+              <span className="text-success">
+                {formatCurrency(totalPagado, moneda)}
+              </span>
+            </div>
+            <div className="pagos-resumen-item">
+              <span className="detail-label">Saldo pendiente</span>
+              <span className={saldo != null && saldo > 0 ? "text-danger" : ""}>
+                {formatCurrency(saldo, moneda)}
+              </span>
+            </div>
+          </div>
+
+          {orden.pagos.length > 0 && (
+            <div className="pagos-lista">
+              <table className="data-table pagos-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Nota</th>
+                    <th>Registrado por</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orden.pagos.map((p) => (
+                    <tr key={p.id}>
+                      <td>{formatDate(p.createdAt, moneda)}</td>
+                      <td className="text-success">
+                        {formatCurrency(Number(p.monto), moneda)}
+                      </td>
+                      <td>{p.metodo ?? "-"}</td>
+                      <td>{p.nota ?? "-"}</td>
+                      <td>{p.usuario.nombre}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {orden.estado !== "CANCELADO" && (
+            <div className="section-margin-top">
+              <p className="section-subtitle">Registrar abono</p>
+              <PagoForm ordenId={id} moneda={moneda} />
             </div>
           )}
         </div>

@@ -2,17 +2,18 @@ import Link from "next/link";
 import { getOrdenes } from "@/lib/actions/ordenes";
 import {
   ESTADO_LABELS,
+  ESTADO_PAGO_LABELS,
   formatDateShort,
   getMoneda,
   ordenEstaAtrasada,
 } from "@/lib/utils";
 
 export default async function OrdenesPage(props: {
-  searchParams: Promise<{ q?: string; estado?: string }>;
+  searchParams: Promise<{ q?: string; estado?: string; estadoPago?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const [ordenes, moneda] = await Promise.all([
-    getOrdenes(searchParams.q, searchParams.estado),
+    getOrdenes(searchParams.q, searchParams.estado, searchParams.estadoPago),
     getMoneda(),
   ]);
 
@@ -40,6 +41,14 @@ export default async function OrdenesPage(props: {
               </option>
             ))}
           </select>
+          <select name="estadoPago" defaultValue={searchParams.estadoPago ?? ""}>
+            <option value="">Todos los pagos</option>
+            {Object.entries(ESTADO_PAGO_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
           <button type="submit" className="btn-primary btn-sm">
             Buscar
           </button>
@@ -58,6 +67,7 @@ export default async function OrdenesPage(props: {
                   <th>Cliente</th>
                   <th>Equipo</th>
                   <th>Estado</th>
+                  <th>Pago</th>
                   <th>Ingreso</th>
                   <th>Fecha prometida</th>
                   <th></th>
@@ -77,6 +87,13 @@ export default async function OrdenesPage(props: {
                         >
                           {ESTADO_LABELS[o.estado]}
                           {atrasada && " ⏰"}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`estado-badge pago-${o.estadoPago.toLowerCase()}`}
+                        >
+                          {ESTADO_PAGO_LABELS[o.estadoPago]}
                         </span>
                       </td>
                       <td>{formatDateShort(o.createdAt, moneda)}</td>

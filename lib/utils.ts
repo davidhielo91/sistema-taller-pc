@@ -80,3 +80,21 @@ export function formatCurrency(
     currency: moneda,
   }).format(amount);
 }
+
+export type EstadoPagoValue = "PENDIENTE" | "ABONADO" | "PAGADO";
+
+export const ESTADO_PAGO_LABELS: Record<EstadoPagoValue, string> = {
+  PENDIENTE: "Sin pagar",
+  ABONADO: "Abonado",
+  PAGADO: "Pagado",
+};
+
+export function calcularEstadoPago(
+  costo: number | null | undefined,
+  totalPagado: number
+): EstadoPagoValue {
+  if (costo == null) return "PENDIENTE";
+  if (totalPagado <= 0) return "PENDIENTE";
+  if (totalPagado >= costo) return "PAGADO";
+  return "ABONADO";
+}

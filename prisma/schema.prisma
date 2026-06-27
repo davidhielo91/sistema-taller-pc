@@ -11,6 +11,12 @@ enum Rol {
   TECNICO
 }
 
+enum EstadoPago {
+  PENDIENTE
+  ABONADO
+  PAGADO
+}
+
 enum EstadoOrden {
   RECIBIDO
   EN_DIAGNOSTICO
@@ -36,6 +42,7 @@ model Usuario {
   ordenesEntregadas Orden[]           @relation("Entrega")
   diagnosticos      Diagnostico[]
   historial         HistorialEstado[]
+  pagos             Pago[]
 }
 
 model Cliente {
@@ -72,8 +79,9 @@ model Orden {
   fechaPrometida DateTime?
   fechaEntrega   DateTime?
 
-  estado EstadoOrden @default(RECIBIDO)
-  costo  Decimal?    @db.Decimal(12, 2)
+  estado     EstadoOrden @default(RECIBIDO)
+  estadoPago EstadoPago  @default(PENDIENTE)
+  costo      Decimal?    @db.Decimal(12, 2)
 
   trabajoRealizado String?
   notasEntrega     String?
@@ -85,6 +93,7 @@ model Orden {
 
   diagnosticos Diagnostico[]
   historial    HistorialEstado[]
+  pagos        Pago[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -103,6 +112,18 @@ model Diagnostico {
   tecnico   Usuario @relation(fields: [tecnicoId], references: [id])
   tecnicoId String
 
+  createdAt DateTime @default(now())
+}
+
+model Pago {
+  id        String   @id @default(cuid())
+  orden     Orden    @relation(fields: [ordenId], references: [id])
+  ordenId   String
+  monto     Decimal  @db.Decimal(12, 2)
+  metodo    String?
+  nota      String?
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId String
   createdAt DateTime @default(now())
 }
 

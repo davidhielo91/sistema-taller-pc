@@ -27,6 +27,15 @@ export const OrdenSchema = z.object({
 
 export type OrdenInput = z.infer<typeof OrdenSchema>;
 
+export const PagoSchema = z.object({
+  ordenId: z.string().min(1),
+  monto: z.number().positive("El monto debe ser mayor a cero"),
+  metodo: z.string().nullable().optional(),
+  nota: z.string().nullable().optional(),
+});
+
+export type PagoInput = z.infer<typeof PagoSchema>;
+
 export const CambioEstadoSchema = z.object({
   ordenId: z.string(),
   nuevoEstado: z.nativeEnum(EstadoOrden),

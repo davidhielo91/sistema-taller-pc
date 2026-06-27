@@ -678,6 +678,53 @@ body {
   margin-top: 1rem;
 }
 
+/* Estado de pago badges */
+.pago-pendiente { background: #fef3c7; color: #92400e; }
+.pago-abonado   { background: #dbeafe; color: #1e40af; }
+.pago-pagado    { background: #d1fae5; color: #065f46; }
+
+/* Text helpers */
+.text-success { color: #059669; font-weight: 500; }
+
+/* Pagos card header */
+.pagos-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.pagos-card-header h2 {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Pagos resumen */
+.pagos-resumen {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.pagos-resumen-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* Pagos table */
+.pagos-lista {
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+}
+
+.pagos-table {
+  font-size: 0.8125rem;
+}
+
 /* Timeline (bitácora de estados) */
 .timeline {
   list-style: none;
