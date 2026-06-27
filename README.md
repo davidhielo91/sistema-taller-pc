@@ -105,6 +105,11 @@ npm run dev
 
 4. Desplegar.
 
+> **⚠️ Seguridad obligatoria antes de exponer en producción:**
+> - Cambia `SESSION_SECRET` por un valor único generado con `openssl rand -base64 32`
+> - Cambia `ADMIN_PASSWORD` por una contraseña segura
+> - El sistema rechazará el arranque en producción si `SESSION_SECRET` sigue siendo el valor de relleno
+
 ## Actualizaciones
 
 ```bash

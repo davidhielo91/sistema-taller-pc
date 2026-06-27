@@ -53,7 +53,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {atrasadas.map((o) => (
+                {await Promise.all(atrasadas.map(async (o) => (
                   <tr key={o.id} className="row-atrasada">
                     <td className="folio-cell">#{o.folio}</td>
                     <td>{o.cliente.nombre}</td>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
                       </span>
                     </td>
                     <td className="text-danger">
-                      {formatDateShort(o.fechaPrometida)}
+                      {await formatDateShort(o.fechaPrometida)}
                     </td>
                     <td>
                       <Link
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

@@ -47,13 +47,13 @@ export default async function ClientesPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {clientes.map((c) => (
+                {await Promise.all(clientes.map(async (c) => (
                   <tr key={c.id}>
                     <td>{c.nombre}</td>
                     <td>{c.telefono ?? "-"}</td>
                     <td>{c.email ?? "-"}</td>
                     <td>{c._count.ordenes}</td>
-                    <td>{formatDateShort(c.createdAt)}</td>
+                    <td>{await formatDateShort(c.createdAt)}</td>
                     <td>
                       <Link
                         href={`/dashboard/clientes/${c.id}`}
@@ -63,7 +63,7 @@ export default async function ClientesPage(props: {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

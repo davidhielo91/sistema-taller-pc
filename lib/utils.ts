@@ -38,28 +38,38 @@ export function ordenEstaAtrasada(
   return new Date() > fechaPrometida;
 }
 
-export function formatDate(date: Date | null | undefined): string {
+const MONEDA_LOCALE: Record<string, string> = {
+  MXN: "es-MX",
+  ARS: "es-AR",
+  COP: "es-CO",
+  USD: "en-US",
+  EUR: "es-ES",
+};
+
+function localeDesdeMoneda(moneda: string): string {
+  return MONEDA_LOCALE[moneda] ?? "es-MX";
+}
+
+export async function getMoneda(): Promise<string> {
+  const ajustes = await prisma.ajustes.findUnique({ where: { id: 1 } });
+  return ajustes?.moneda ?? "MXN";
+}
+
+export async function formatDate(date: Date | null | undefined): Promise<string> {
   if (!date) return "-";
-  return new Intl.DateTimeFormat("es-MX", {
+  const moneda = await getMoneda();
+  return new Intl.DateTimeFormat(localeDesdeMoneda(moneda), {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-export function formatDateShort(date: Date | null | undefined): string {
+export async function formatDateShort(date: Date | null | undefined): Promise<string> {
   if (!date) return "-";
-  return new Intl.DateTimeFormat("es-MX", {
+  const moneda = await getMoneda();
+  return new Intl.DateTimeFormat(localeDesdeMoneda(moneda), {
     dateStyle: "short",
   }).format(date);
-}
-
-let _moneda: string | null = null;
-
-export async function getMoneda(): Promise<string> {
-  if (_moneda) return _moneda;
-  const ajustes = await prisma.ajustes.findUnique({ where: { id: 1 } });
-  _moneda = ajustes?.moneda ?? "MXN";
-  return _moneda;
 }
 
 export async function formatCurrency(
@@ -67,7 +77,7 @@ export async function formatCurrency(
 ): Promise<string> {
   if (amount == null) return "-";
   const moneda = await getMoneda();
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat(localeDesdeMoneda(moneda), {
     style: "currency",
     currency: moneda,
   }).format(amount);

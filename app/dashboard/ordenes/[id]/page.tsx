@@ -45,7 +45,7 @@ export default async function OrdenDetailPage(props: {
           </span>
         </div>
         <Link
-          href={`/dashboard/ordenes/${id}/comprobante`}
+          href={`/comprobante/${id}`}
           target="_blank"
           className="btn-secondary btn-sm"
         >
@@ -126,12 +126,12 @@ export default async function OrdenDetailPage(props: {
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha de ingreso</span>
-                <span>{formatDate(orden.fechaIngreso)}</span>
+                <span>{await formatDate(orden.fechaIngreso)}</span>
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha prometida</span>
                 <span className={atrasada ? "text-danger" : ""}>
-                  {formatDateShort(orden.fechaPrometida)}
+                  {await formatDateShort(orden.fechaPrometida)}
                 </span>
               </div>
             </div>
@@ -163,7 +163,7 @@ export default async function OrdenDetailPage(props: {
               </div>
               <div className="detail-field">
                 <span className="detail-label">Fecha de entrega</span>
-                <span>{formatDate(orden.fechaEntrega)}</span>
+                <span>{await formatDate(orden.fechaEntrega)}</span>
               </div>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default async function OrdenDetailPage(props: {
                   <div key={d.id} className="diagnostico-item">
                     <div className="diagnostico-header">
                       <span className="text-muted">
-                        {formatDate(d.createdAt)} - {d.tecnico.nombre}
+                        {await formatDate(d.createdAt)} - {d.tecnico.nombre}
                       </span>
                       <span>
                         {d.aprobado === true && (

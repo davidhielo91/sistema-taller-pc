@@ -45,7 +45,7 @@ export default async function ClienteDetailPage(props: {
             </div>
             <div className="detail-field">
               <span className="detail-label">Registrado</span>
-              <span>{formatDate(cliente.createdAt)}</span>
+              <span>{await formatDate(cliente.createdAt)}</span>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default async function ClienteDetailPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {cliente.ordenes.map((o) => (
+                {await Promise.all(cliente.ordenes.map(async (o) => (
                   <tr key={o.id}>
                     <td>#{o.folio}</td>
                     <td>{o.tipoEquipo}</td>
@@ -78,7 +78,7 @@ export default async function ClienteDetailPage(props: {
                         {ESTADO_LABELS[o.estado]}
                       </span>
                     </td>
-                    <td>{formatDateShort(o.createdAt)}</td>
+                    <td>{await formatDateShort(o.createdAt)}</td>
                     <td>{o.recibidoPor.nombre}</td>
                     <td>
                       <Link
@@ -89,7 +89,7 @@ export default async function ClienteDetailPage(props: {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

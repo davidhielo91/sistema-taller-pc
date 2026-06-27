@@ -4,6 +4,23 @@ import { cookies } from "next/headers";
 import type { SessionPayload } from "./definitions";
 
 const secretKey = process.env.SESSION_SECRET;
+
+if (!secretKey) {
+  throw new Error(
+    "SESSION_SECRET no está definida. Debe configurarse en el archivo .env o en las variables de entorno."
+  );
+}
+
+if (
+  process.env.NODE_ENV === "production" &&
+  secretKey === "cambiar-por-un-secreto-seguro-en-produccion"
+) {
+  throw new Error(
+    "SESSION_SECRET tiene el valor de relleno predeterminado. " +
+      "Genere un secreto seguro con: openssl rand -base64 32"
+  );
+}
+
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: SessionPayload) {
@@ -34,7 +51,7 @@ export async function createSession(userId: string, rol: string) {
 
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",

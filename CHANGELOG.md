@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.3] — 2026-06-26
+
+### Mejorado
+
+- `getMoneda()` ahora consulta la base de datos siempre (sin caché en memoria), reflejando cambios de moneda al instante
+- Mapa `MONEDA_LOCALE` para formatear fechas y montos según la moneda configurada (MXN→es-MX, ARS→es-AR, COP→es-CO, USD→en-US, EUR→es-ES, default es-MX)
+
+## [1.0.2] — 2026-06-26
+
+### Seguridad
+
+- `SESSION_SECRET` ahora se valida al arrancar: error claro si está vacía/ausente, y error en producción si aún tiene el valor de relleno
+- Cookie de sesión: `secure: true` solo en producción, permitiendo login por HTTP plano en desarrollo local
+
+## [1.0.1] — 2026-06-26
+
+### Corregido
+
+- Comprobante de ingreso: movido a ruta independiente `/comprobante/[id]` fuera del layout del dashboard para evitar HTML anidado inválido (`<html>` dentro de `<html>`)
+- Botón de impresión extraído a componente cliente `PrintButton.tsx` para eliminar el `onClick` en línea del Server Component
+- Enlace actualizado en el detalle de la orden para abrir el comprobante en nueva pestaña (`target="_blank"`)
+
 ## [1.0.0] — 2026-06-26
 
 ### Añadido v1 completa

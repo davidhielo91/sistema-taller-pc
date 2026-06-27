@@ -60,7 +60,7 @@ export default async function OrdenesPage(props: {
                 </tr>
               </thead>
               <tbody>
-                {ordenes.map((o) => {
+                {await Promise.all(ordenes.map(async (o) => {
                   const atrasada = ordenEstaAtrasada(o.estado, o.fechaPrometida);
                   return (
                     <tr key={o.id} className={atrasada ? "row-atrasada" : ""}>
@@ -75,14 +75,14 @@ export default async function OrdenesPage(props: {
                           {atrasada && " ⏰"}
                         </span>
                       </td>
-                      <td>{formatDateShort(o.createdAt)}</td>
+                      <td>{await formatDateShort(o.createdAt)}</td>
                       <td>
                         <span
                           className={
                             atrasada ? "text-danger" : "text-muted"
                           }
                         >
-                          {formatDateShort(o.fechaPrometida)}
+                          {await formatDateShort(o.fechaPrometida)}
                         </span>
                       </td>
                       <td>
@@ -95,7 +95,7 @@ export default async function OrdenesPage(props: {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
