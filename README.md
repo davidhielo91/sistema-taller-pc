@@ -20,10 +20,13 @@ Cada taller despliega su propia copia con su propia base de datos (no hay datos 
 - **Dashboard:** conteo de órdenes por estado y lista de las 10 más atrasadas.
 - **Multi-moneda:** los montos y fechas se formatean según la moneda configurada (MXN, ARS, COP, USD, EUR, etc.).
 
-### v1.1 — Trazabilidad y pagos
+### v1.1 — Trazabilidad, pagos y herramientas de comunicación
 
 - **Bitácora de estados:** cada cambio de estado queda registrado con fecha, hora y técnico. Se muestra como línea de tiempo en el detalle de la orden.
 - **Pagos y abonos:** registro de cobros parciales o totales (monto, método, nota). La orden muestra costo total, total abonado y saldo pendiente. Estado de pago (`Sin pagar / Abonado / Pagado`) visible en el listado con filtro.
+- **Aviso por WhatsApp:** botón en el detalle de la orden que abre un enlace `wa.me` con mensaje personalizable (plantilla configurable en Ajustes). Solo visible si el cliente tiene teléfono.
+- **Etiqueta imprimible:** página compacta `/etiqueta/[id]` con folio grande, cliente y datos del equipo. Ideal para pegar en el equipo físico.
+- **Reportes:** página `/dashboard/reportes` con filtro de fechas; muestra ingresos del período, reparaciones entregadas, tiempo promedio y desglose por técnico.
 
 ---
 
