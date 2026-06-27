@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.2] — 2026-06-27
+
+### Corregido — Error de build "Module not found: Can't resolve 'dns'"
+
+- **Causa raíz:** `lib/utils.ts` importaba `prisma` (para `getMoneda`), lo que arrastraba el driver `pg` (Node.js) al bundle del navegador cuando componentes cliente importaban `ESTADO_LABELS` o `TRANSICIONES` desde ese mismo módulo.
+- **Separación de módulos:** `lib/utils.ts` contiene ahora solo helpers puros (sin imports de Node/Prisma), seguros para uso en componentes cliente: `ESTADO_LABELS`, `TRANSICIONES`, `esEstadoTerminal`, `ordenEstaAtrasada`, `localeDesdeMoneda`, `ESTADO_PAGO_LABELS`, `calcularEstadoPago`.
+- **Nuevo `lib/format.ts`** con `import "server-only"`: contiene `getMoneda`, `formatDate`, `formatDateShort`, `formatCurrency`. Si en el futuro un componente cliente intenta importarlas, el build falla con un mensaje claro en lugar de arrastrar `pg` al navegador.
+- Actualizadas las 6 páginas de servidor que usan funciones de formato para importar de `@/lib/format`: `app/dashboard/ordenes/[id]/page.tsx`, `app/dashboard/ordenes/page.tsx`, `app/dashboard/page.tsx`, `app/dashboard/clientes/[id]/page.tsx`, `app/dashboard/clientes/page.tsx`, `app/comprobante/[id]/page.tsx`.
+- **`lib/session.ts`:** validaciones de `SESSION_SECRET` movidas de nivel-módulo (se ejecutaban al importar, bloqueando el build) a `getEncodedKey()` (se ejecutan al primer uso en tiempo de ejecución). El comportamiento en producción es idéntico: cualquier operación de sesión falla con mensaje claro si el secreto falta o es el valor de relleno.
+- `prisma generate` ejecutado para regenerar el cliente con los modelos `Pago`, `HistorialEstado` y el enum `EstadoPago` añadidos en versiones anteriores.
+
 ## [1.1.1] — 2026-06-27
 
 ### Añadido — Pagos y abonos (v1.1, sección 2)

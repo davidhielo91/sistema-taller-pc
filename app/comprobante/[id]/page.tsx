@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/session";
 import { cookies } from "next/headers";
-import { formatDateShort } from "@/lib/utils";
+import { formatDateShort } from "@/lib/format";
 import { PrintButton } from "./PrintButton";
 
 export default async function ComprobantePage(props: {

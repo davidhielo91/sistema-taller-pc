@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/dal";
 import { getDashboardStats } from "@/lib/actions/dashboard";
-import { ESTADO_LABELS, formatDateShort, getMoneda } from "@/lib/utils";
+import { ESTADO_LABELS } from "@/lib/utils";
+import { formatDateShort, getMoneda } from "@/lib/format";
 import Link from "next/link";
 
 export default async function DashboardPage() {

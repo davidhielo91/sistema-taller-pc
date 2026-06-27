@@ -3,10 +3,9 @@ import { getOrdenes } from "@/lib/actions/ordenes";
 import {
   ESTADO_LABELS,
   ESTADO_PAGO_LABELS,
-  formatDateShort,
-  getMoneda,
   ordenEstaAtrasada,
 } from "@/lib/utils";
+import { formatDateShort, getMoneda } from "@/lib/format";
 
 export default async function OrdenesPage(props: {
   searchParams: Promise<{ q?: string; estado?: string; estadoPago?: string }>;

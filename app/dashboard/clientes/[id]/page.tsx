@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCliente } from "@/lib/actions/clientes";
-import { ESTADO_LABELS, formatDate, formatDateShort, getMoneda } from "@/lib/utils";
+import { ESTADO_LABELS } from "@/lib/utils";
+import { formatDate, formatDateShort, getMoneda } from "@/lib/format";
 
 export default async function ClienteDetailPage(props: {
   params: Promise<{ id: string }>;

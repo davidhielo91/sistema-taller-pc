@@ -5,13 +5,10 @@ import {
   ESTADO_LABELS,
   ESTADO_PAGO_LABELS,
   TRANSICIONES,
-  formatDate,
-  formatDateShort,
-  formatCurrency,
-  getMoneda,
   ordenEstaAtrasada,
   esEstadoTerminal,
 } from "@/lib/utils";
+import { formatDate, formatDateShort, formatCurrency, getMoneda } from "@/lib/format";
 import { PagoForm } from "./PagoForm";
 import { CambiarEstadoForm } from "./CambiarEstadoForm";
 import { DiagnosticoForm } from "./DiagnosticoForm";

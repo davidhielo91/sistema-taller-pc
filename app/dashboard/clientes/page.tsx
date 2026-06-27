@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getClientes } from "@/lib/actions/clientes";
-import { formatDateShort, getMoneda } from "@/lib/utils";
+import { formatDateShort, getMoneda } from "@/lib/format";
 
 export default async function ClientesPage(props: {
   searchParams: Promise<{ q?: string }>;

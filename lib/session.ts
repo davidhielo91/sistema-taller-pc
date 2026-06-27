@@ -3,39 +3,38 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import type { SessionPayload } from "./definitions";
 
-const secretKey = process.env.SESSION_SECRET;
-
-if (!secretKey) {
-  throw new Error(
-    "SESSION_SECRET no está definida. Debe configurarse en el archivo .env o en las variables de entorno."
-  );
+function getEncodedKey(): Uint8Array {
+  const key = process.env.SESSION_SECRET;
+  if (!key) {
+    throw new Error(
+      "SESSION_SECRET no está definida. Debe configurarse en el archivo .env o en las variables de entorno."
+    );
+  }
+  if (
+    process.env.NODE_ENV === "production" &&
+    key === "cambiar-por-un-secreto-seguro-en-produccion"
+  ) {
+    throw new Error(
+      "SESSION_SECRET tiene el valor de relleno predeterminado. " +
+        "Genere un secreto seguro con: openssl rand -base64 32"
+    );
+  }
+  return new TextEncoder().encode(key);
 }
-
-if (
-  process.env.NODE_ENV === "production" &&
-  secretKey === "cambiar-por-un-secreto-seguro-en-produccion"
-) {
-  throw new Error(
-    "SESSION_SECRET tiene el valor de relleno predeterminado. " +
-      "Genere un secreto seguro con: openssl rand -base64 32"
-  );
-}
-
-const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(encodedKey);
+    .sign(getEncodedKey());
 }
 
 export async function decrypt(
   session: string | undefined = ""
 ): Promise<SessionPayload | undefined> {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
+    const { payload } = await jwtVerify(session, getEncodedKey(), {
       algorithms: ["HS256"],
     });
     return payload as unknown as SessionPayload;
