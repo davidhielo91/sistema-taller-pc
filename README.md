@@ -22,8 +22,10 @@ Cubre el flujo completo: recepción de equipos, diagnóstico, presupuesto, repar
 - **Comprobante de ingreso en PDF**: página imprimible con datos del taller
 - **Ajustes del taller** (solo ADMIN): nombre, moneda, teléfono, dirección, logo
 - **Gestión de usuarios** (solo ADMIN): crear, activar/desactivar, cambiar rol
-- **Moneda configurable** desde Ajustes, formateo con `Intl.NumberFormat`
+- **Moneda configurable** desde Ajustes, formateo con `Intl.NumberFormat` y locale automático según moneda (MXN→es-MX, ARS→es-AR, USD→en-US, etc.)
 - **Sidebar responsiva** con enlaces condicionales según el rol
+- **Seguridad**: validación de `SESSION_SECRET` al arrancar, cookie `secure` solo en producción
+- **Comprobante PDF** en ruta independiente `/comprobante/[id]` con botón de impresión
 
 ## Requisitos
 
