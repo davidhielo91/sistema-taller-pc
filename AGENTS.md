@@ -73,7 +73,7 @@ El esquema de referencia completo está en `prisma/schema.prisma`. Resumen de en
 - **`Diagnostico`**: hallazgos, solucionPropuesta?, costoEstimado?, aprobado (null=pendiente), tecnicoId, ordenId.
 - **`HistorialEstado`** (v1.1): ordenId, estadoAnterior?, estadoNuevo, usuarioId, createdAt. Registro inmutable de cada transición de estado.
 - **`Pago`** (v1.1): ordenId, monto, metodo?, nota?, usuarioId, createdAt. Registro inmutable de cada cobro.
-- **`Ajustes`**: singleton (id=1). nombreTaller, moneda (ISO 4217), telefono?, direccion?, logoUrl?.
+- **`Ajustes`**: singleton (id=1). nombreTaller, moneda (ISO 4217), telefono?, direccion?, logoUrl?, codigoPaisWhatsapp?, mensajeWhatsappListo?.
 
 ### Notas del modelo
 - **La moneda es global del taller**, vive en `Ajustes.moneda`. No se elige por orden.
@@ -195,13 +195,13 @@ No hace falta un sistema de permisos granular. Basta con estos dos roles.
   - `lib/utils.ts` — helpers **puros**, sin imports de Node.js ni Prisma. Seguro para
     importar desde componentes cliente. Contiene: `ESTADO_LABELS`, `TRANSICIONES`,
     `ESTADO_PAGO_LABELS`, `calcularEstadoPago`, `esEstadoTerminal`, `ordenEstaAtrasada`,
-    `localeDesdeMoneda`.
+    `localeDesdeMoneda`, `buildWhatsAppUrl`.
   - `lib/format.ts` — funciones de formato y acceso a BD. Empieza con
     `import "server-only"`. Contiene: `getMoneda`, `formatDate`, `formatDateShort`,
     `formatCurrency`. Si un componente cliente intenta importar este módulo, el build
     falla de inmediato con mensaje claro.
   - `lib/actions/` — Server Actions (`"use server"`). Cada archivo agrupa las acciones
-    de una entidad (`ordenes.ts`, `clientes.ts`, `pagos.ts`, etc.).
+    de una entidad (`ordenes.ts`, `clientes.ts`, `pagos.ts`, `ajustes.ts`, `reportes.ts`, etc.).
   - No mezclar: **nunca** importes `prisma` desde un archivo que pueda ser incluido en
     el bundle del navegador.
 - Textos de interfaz en español.
